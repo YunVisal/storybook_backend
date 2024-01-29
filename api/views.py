@@ -48,6 +48,20 @@ class LoginAPIView(APIView):
     return response
 
 
+class RefreshTokenAPIView(APIView):
+  def get(self, request):
+    refresh_token = request.COOKIES.get("refresh")
+    try:
+      if refresh_token is None:
+        raise ValueError("Refresh token is not valid")
+      token = RefreshToken(refresh_token)
+      access_token = {"access": str(token.access_token)}
+      return Response(access_token, status=status.HTTP_200_OK)
+    except ValueError as error:
+      return Response({"detail": repr(error)}, status=status.HTTP_401_UNAUTHORIZED)
+    except:
+      return Response({"detail": "Something went wrong!"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class UserViewSet(ModelViewSet):
   serializer_class = serializers.UserSerializer
